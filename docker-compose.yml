@@ -63,7 +63,7 @@ services:
       - "traefik.http.routers.pf.middlewares=redirecthttps"
     networks:
       - pf
-      - web
+      - proxy
     healthcheck:
       disable: true
     volumes:
@@ -78,39 +78,40 @@ services:
       - pf-redis
       - pf-socket
     restart: always
-  traefik:
-    image: traefik:v2.3
-    container_name: traefik
-    command:
-      - "--log.level=ERROR"
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web.address=:80"
-      - "--entrypoints.websecure.address=:443"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
-      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
-      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
-      # Remove below line when ready for production
-      - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # Remove this line only
-      - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
-    ports:
-      - "80:80"
-      - "443:443"
-      - "8080:8080"
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./letsencrypt:/letsencrypt
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    networks:
-      - web
-    restart: always
+  # traefik:
+  #   image: traefik:v2.3
+  #   container_name: traefik
+  #   command:
+  #     - "--log.level=ERROR"
+  #     - "--api.insecure=true"
+  #     - "--providers.docker=true"
+  #     - "--providers.docker.exposedbydefault=false"
+  #     - "--entrypoints.web.address=:80"
+  #     - "--entrypoints.websecure.address=:443"
+  #     - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+  #     - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+  #     - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+  #     # Remove below line when ready for production
+  #     - "--certificatesresolvers.letsencrypt.acme.caserver=https://acme-staging-v02.api.letsencrypt.org/directory" # Remove this line only
+  #     - "--certificatesresolvers.letsencrypt.acme.email=${LE_EMAIL}"
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #     - "8080:8080"
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #     - ./letsencrypt:/letsencrypt
+  #     - /etc/timezone:/etc/timezone:ro
+  #     - /etc/localtime:/etc/localtime:ro
+  #   networks:
+  #     - web
+  #   restart: always
 
 volumes:
      db_data:
      redis_data:
 networks:
     pf:
-    web:
+    proxy:
       external: true
+      name: proxy
